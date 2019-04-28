@@ -1,0 +1,18 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: config scripts",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/create-nginx-config.py",
+      "console": "externalTerminal",
+      "env": {
+        "DOMAINS": "www.example.com->http://127.0.0.1:5000;www2.example.com->https://127.0.0.1:5001;www.example.com->http://gooooo.com:5000"
+      }
+    }
+  ]
+}
