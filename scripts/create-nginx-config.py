@@ -1,7 +1,16 @@
-import os, re, sys
+import os, re, sys, errno
+
+def mkdir_p(path, mode):
+    try:
+        os.makedirs(path, mode)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 env_domains_regex = re.compile(
-    "(?:([a-z0-9.]+)->(https?://[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
+    "(?:([a-z0-9.-]+)->(https?:\/\/[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
 )
 
 nginx_template = """server {{
@@ -39,6 +48,7 @@ nginx_websocket_template = """
 """
 
 nginx_conf_path = "/etc/nginx/conf.d/"
+mkdir_p(nginx_conf_path, 0700)
 
 print("Creating nginx config from template and environment variables")
 
@@ -58,7 +68,7 @@ if len(env_domains_array) > 0:
             nginx_websocket=nginx_websocket_template if env_websocket else "",
         )
         nginx_domain_conf_path = os.path.join(nginx_conf_path, domain+".conf")
-        f = open(os.path.join(nginx_domain_conf_path, "w"))
+        f = open(nginx_domain_conf_path, "w")
         f.write(nginx_merged)
         f.close()
         print(nginx_domain_conf_path + " saved")
