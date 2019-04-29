@@ -4,7 +4,18 @@
 trap "exit" INT TERM
 trap "kill 0" EXIT
 
-python create-nginx-config.py
+if [ -z "$IS_STAGING" ]; then
+    export IS_STAGING=1
+fi
+
+if [ -z "$DOMAINS" ]; then
+    error "DOMAINS environment variable undefined"
+    exit 1
+fi
+
+nginx -v
+python --version
+python scripts/create-nginx-config.py
 [ $? -ne 0 ] && exit 1
 
-. entrypoint.sh
+. $(cd $(dirname $0); pwd)/entrypoint.sh
