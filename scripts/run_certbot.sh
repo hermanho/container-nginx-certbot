@@ -10,6 +10,26 @@ if [ -z "$CERTBOT_EMAIL" ]; then
 fi
 
 exit_code=0
+
+# apt-get update && apt-get install -y libssl-dev curl
+
+# Ensure nginx bootup first
+curl_ret=0
+sleep 5 &
+curl --write-out %{http_code} --silent --output /dev/null -L --head --max-time 10 "http://127.0.0.1"
+curl_ret=$?
+if [ curl_ret -ne 0 ]
+then
+    error "Nginx booting error."
+    exit_code=1
+fi
+echo "Nginx ready."
+
+# apt-get remove --purge -y libssl-dev curl && \
+# apt-get autoremove -y 
+# apt-get clean && \
+# rm -rf /var/lib/apt/lists/*
+
 set -x
 # Loop over every domain we can find
 for domain in $(parse_domains); do
