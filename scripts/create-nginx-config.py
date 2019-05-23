@@ -14,7 +14,7 @@ env_domains_regex = re.compile(
 )
 
 nginx_template = """server {{
-        listen              443 ssl;
+        listen              443 ssl http2;
         server_name         {dns};
         ssl_certificate     /etc/letsencrypt/live/{dns}/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/{dns}/privkey.pem;
@@ -34,6 +34,9 @@ nginx_template = """server {{
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_buffers 32 4k; 
+            proxy_buffer_size 32k;
+            proxy_busy_buffers_size 32k;
 
 {nginx_websocket}
         }}
