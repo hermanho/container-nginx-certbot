@@ -15,6 +15,7 @@ exit_code=0
 if [ -z "$SLEEP_TIMEOUT" ]; then
     SLEEP_TIMEOUT=15
 fi
+echo "Sleep $SLEEP_TIMEOUT seconds."
 # Ensure nginx bootup first
 curl_ret=0
 sleep $SLEEP_TIMEOUT
