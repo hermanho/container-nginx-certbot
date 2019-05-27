@@ -13,7 +13,7 @@ exit_code=0
 
 # Ensure nginx bootup first
 curl_ret=0
-sleep 5
+sleep 15
 curl --write-out "%{http_code}\n" --silent --output /dev/null --head --max-time 15 "http://127.0.0.1"
 curl_ret=$?
 if [ $curl_ret -ne 0 ]
