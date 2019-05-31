@@ -37,6 +37,7 @@ nginx_template = """server {{
             proxy_buffers 32 4k; 
             proxy_buffer_size 32k;
             proxy_busy_buffers_size 32k;
+            client_max_body_size 1G;
 
 {nginx_websocket}
         }}
