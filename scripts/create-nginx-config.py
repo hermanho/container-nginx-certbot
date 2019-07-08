@@ -41,6 +41,13 @@ nginx_template = """server {{
 
 {nginx_websocket}
         }}
+        
+        
+        location /nginx-health {{
+            access_log off;
+            default_type text/plain;
+            return 200 "healthy\n";
+        }}
     }}
 """
 
