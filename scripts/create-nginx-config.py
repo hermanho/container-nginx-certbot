@@ -24,10 +24,6 @@ nginx_template = """server {{
         ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
         ssl_prefer_server_ciphers on;
 
-        if ($host != $server_name) {{
-            return 444;
-        }}
-
         location / {{
             proxy_pass {forwardUri};
             proxy_set_header Host $host;
