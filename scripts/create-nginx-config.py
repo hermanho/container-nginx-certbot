@@ -14,43 +14,41 @@ env_domains_regex = re.compile(
 )
 
 nginx_template = """
-http {{
-    map $http_upgrade $connection_upgrade {{
-        default upgrade;
-        ''      close;
+map $http_upgrade $connection_upgrade {{
+    default upgrade;
+    ''      close;
+}}
+
+server {{
+    listen              443 ssl http2;
+    server_name         {dns};
+    ssl_certificate     /etc/letsencrypt/live/{dns}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{dns}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:50m;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
+    ssl_prefer_server_ciphers on;
+
+    location / {{
+        proxy_pass {forwardUri};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffers 32 4k; 
+        proxy_buffer_size 32k;
+        proxy_busy_buffers_size 32k;
+        client_max_body_size 1G;
+
+{nginx_websocket}
     }}
-
-    server {{
-        listen              443 ssl http2;
-        server_name         {dns};
-        ssl_certificate     /etc/letsencrypt/live/{dns}/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/{dns}/privkey.pem;
-
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_session_cache shared:SSL:50m;
-        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
-        ssl_prefer_server_ciphers on;
-
-        location / {{
-            proxy_pass {forwardUri};
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_buffers 32 4k; 
-            proxy_buffer_size 32k;
-            proxy_busy_buffers_size 32k;
-            client_max_body_size 1G;
-
-    {nginx_websocket}
-        }}
-
-
-        location /nginx-health {{
-            access_log off;
-            default_type text/plain;
-            return 200 "healthy\n";
-        }}
+    
+    
+    location /nginx-health {{
+        access_log off;
+        default_type text/plain;
+        return 200 "healthy\n";
     }}
 }}
 """
