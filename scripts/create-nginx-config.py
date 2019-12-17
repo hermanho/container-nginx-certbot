@@ -72,7 +72,6 @@ server {{
     proxy_buffer_size 32k;
     proxy_busy_buffers_size 32k;
     client_max_body_size 1G;
-    proxy_request_buffering off;
     proxy_max_temp_file_size 0;
 
     location / {{
