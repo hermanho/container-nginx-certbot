@@ -14,9 +14,21 @@ env_domains_regex = re.compile(
 )
 
 nginx_template = """
+map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
+    default $http_x_forwarded_proto;
+    ''      $scheme;
+}}
+map $http_x_forwarded_port $proxy_x_forwarded_port {{
+    default $http_x_forwarded_port;
+    ''      $server_port;
+}}
 map $http_upgrade $connection_upgrade {{
     default upgrade;
     ''      close;
+}}
+map $scheme $proxy_x_forwarded_ssl {{
+    default off;
+    https on;
 }}
 
 server {{
@@ -61,6 +73,7 @@ server {{
     proxy_busy_buffers_size 32k;
     client_max_body_size 1G;
     proxy_request_buffering off;
+    proxy_max_temp_file_size 0;
 
     location / {{
         proxy_pass {forwardUri};
