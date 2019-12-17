@@ -28,21 +28,41 @@ server {{
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off;
+    ssl_buffer_size 4k;
 
     # modern configuration
     ssl_protocols TLSv1.3;
     ssl_prefer_server_ciphers off;
     
+    # HSTS (ngx_http_headers_module is required) (63072000 seconds)
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+    proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
+    proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+    
+    proxy_buffering off;
+    proxy_buffers 32 4k; 
+    proxy_buffer_size 32k;
+    proxy_busy_buffers_size 32k;
+    client_max_body_size 1G;
+
     location / {{
         proxy_pass {forwardUri};
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffers 32 4k; 
-        proxy_buffer_size 32k;
-        proxy_busy_buffers_size 32k;
-        client_max_body_size 1G;
 
 {nginx_websocket}
     }}
