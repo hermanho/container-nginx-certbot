@@ -14,9 +14,21 @@ env_domains_regex = re.compile(
 )
 
 nginx_template = """
+map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
+    default $http_x_forwarded_proto;
+    ''      $scheme;
+}}
+map $http_x_forwarded_port $proxy_x_forwarded_port {{
+    default $http_x_forwarded_port;
+    ''      $server_port;
+}}
 map $http_upgrade $connection_upgrade {{
     default upgrade;
     ''      close;
+}}
+map $scheme $proxy_x_forwarded_ssl {{
+    default off;
+    https on;
 }}
 
 server {{
@@ -25,21 +37,45 @@ server {{
     ssl_certificate     /etc/letsencrypt/live/{dns}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{dns}/privkey.pem;
 
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_session_cache shared:SSL:50m;
-    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
-    ssl_prefer_server_ciphers on;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+    ssl_buffer_size 4k;
+
+    # modern configuration
+    ssl_protocols TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    
+    # HSTS (ngx_http_headers_module is required) (63072000 seconds)
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+    proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
+    proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+    
+    proxy_buffering off;
+    proxy_buffers 32 4k; 
+    proxy_buffer_size 32k;
+    proxy_busy_buffers_size 32k;
+    client_max_body_size 1G;
+    proxy_max_temp_file_size 0;
 
     location / {{
         proxy_pass {forwardUri};
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffers 32 4k; 
-        proxy_buffer_size 32k;
-        proxy_busy_buffers_size 32k;
-        client_max_body_size 1G;
 
 {nginx_websocket}
     }}
