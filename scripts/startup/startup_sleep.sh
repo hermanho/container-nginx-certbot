@@ -12,7 +12,7 @@ curl --write-out "%{http_code}\n" --silent --output /dev/null --head --max-time 
 curl_ret=$?
 if [ $curl_ret -ne 0 ]; then
     echo "$curl_ret"
-    error "Nginx booting error."
+    echo "Nginx booting error."
     exit_code=1
     exit $exit_code
 fi

@@ -97,7 +97,7 @@ nginx_websocket_template = """
 """
 
 nginx_conf_path = "/etc/nginx/conf.d/"
-mkdir_p(nginx_conf_path, 0700)
+mkdir_p(nginx_conf_path, 0o700)
 
 print("Creating nginx config from template and environment variables")
 

@@ -14,8 +14,8 @@ if [ -z "$DOMAINS" ]; then
 fi
 
 nginx -v
-python --version
-python scripts/create-nginx-config.py
+python3 --version
+python3 scripts/create-nginx-config.py
 [ $? -ne 0 ] && exit 1
 
 . $(cd $(dirname $0); pwd)/entrypoint.sh
