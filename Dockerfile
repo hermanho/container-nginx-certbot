@@ -5,7 +5,6 @@ LABEL version="1.5.0"
 RUN sed -i 's|^deb http://deb.debian.org/debian|deb http://debian-archive.trafficmanager.net/debian|' /etc/apt/sources.list
 
 FROM base
-
 COPY ./scripts/ /scripts
 RUN chmod +x /scripts/**/*.sh
 
