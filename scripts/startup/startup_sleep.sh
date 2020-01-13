@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# When we get killed, kill all our children
-trap "exit" INT TERM
-trap "kill 0" EXIT
-
 if [ -z "$SLEEP_TIMEOUT" ]; then
     SLEEP_TIMEOUT=15
 fi
