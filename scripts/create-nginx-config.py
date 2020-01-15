@@ -13,6 +13,11 @@ env_domains_regex = re.compile(
     "(?:([a-z0-9.-]+)->(https?:\/\/[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
 )
 
+ssl_protocols_str = 'TLSv1.3'
+if 'ALLOW_TLS1.2' in os.environ and os.environ['ALLOW_TLS1.2'] == 'TRUE'
+    ssl_protocols_str = ssl_protocols_str + ' TLSv1.2'
+
+
 nginx_template = """
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
     default $http_x_forwarded_proto;
@@ -43,7 +48,7 @@ server {{
     ssl_buffer_size 4k;
 
     # modern configuration
-    ssl_protocols TLSv1.3;
+    ssl_protocols """ + ssl_protocols_str + """;
     ssl_prefer_server_ciphers off;
     
     # HSTS (ngx_http_headers_module is required) (63072000 seconds)
