@@ -14,7 +14,7 @@ env_domains_regex = re.compile(
 )
 
 ssl_protocols_str = 'TLSv1.3'
-if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'TRUE'
+if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'TRUE':
     print("Enable TLSv1.2")
     ssl_protocols_str = ssl_protocols_str + ' TLSv1.2'
 
