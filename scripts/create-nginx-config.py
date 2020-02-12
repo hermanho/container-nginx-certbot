@@ -13,11 +13,11 @@ env_domains_regex = re.compile(
     "(?:([a-z0-9.-]+)->(https?:\/\/[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
 )
 
-ssl_protocols_str = 'TLSv1.3'
-if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'TRUE':
-    print("Enable TLSv1.2")
-    ssl_protocols_str = ssl_protocols_str + ' TLSv1.2'
-
+ssl_protocols_str = 'TLSv1.3 TLSv1.2'
+if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'FALSE':
+    print("Disable TLSv1.2")
+    ssl_protocols_str = ssl_protocols_str.replace('TLSv1.2', '')
+print("ssl_protocols_str: " + ssl_protocols_str)
 
 nginx_template = """
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
