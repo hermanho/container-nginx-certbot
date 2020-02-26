@@ -6,6 +6,8 @@ RUN sed -i 's|^deb http://deb.debian.org/debian|deb http://debian-archive.traffi
 
 FROM base
 COPY ./scripts/ /scripts
+RUN chmod og-w /scripts/**/*.sh
+RUN chmod +x /scripts/*.sh
 RUN chmod +x /scripts/**/*.sh
 
 RUN apt-get update && \

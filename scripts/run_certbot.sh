@@ -24,6 +24,7 @@ for domain in $(parse_domains); do
         echo "Not run certbot for $domain; last renewal happened just recently."
     fi
 done
+[ exit_code -ne 0 ] && exit 1
 
 # After trying to get all our certificates, auto enable any configs that we
 # did indeed get certificates for
