@@ -1,8 +1,15 @@
 #!/bin/bash
 
+set -o nounset \
+    -o errexit \
+    -o verbose \
+    -o xtrace
+
 # When we get killed, kill all our children
 trap "exit" INT TERM
 trap "kill 0" EXIT
+
+echo "entrypoint-herman"
 
 if [ -z "$IS_STAGING" ]; then
     export IS_STAGING=1
