@@ -14,6 +14,7 @@ set -x
 # Loop over every domain we can find
 for domain in $(parse_domains); do
     if is_renewal_required $domain; then
+        echo "Renew ssl for $domain."
         # Renewal required for this doman.
         # Last one happened over a week ago (or never)
         if ! get_certificate $domain $CERTBOT_EMAIL; then
@@ -32,6 +33,7 @@ auto_enable_configs
 # Finally, tell nginx to reload the configs
 # kill -HUP $NGINX_PID
 nginx -s reload
+echo "nginx reloaded."
     
 set +x
 exit $exit_code
