@@ -18,7 +18,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN chown -R nginx:app /scripts
+RUN chown -R nginx /scripts
 RUN chmod 755 /scripts
 USER nginx
 
