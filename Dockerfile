@@ -18,10 +18,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN chown -R nginx /scripts
-RUN chown -R nginx /etc/nginx
+RUN chown -R 1001 /scripts
+RUN chown -R 1001 /etc/nginx
 RUN chmod 755 /scripts
-USER nginx
+USER 1001
 
 ENTRYPOINT []
 CMD ["/bin/bash", "/scripts/entrypoint-herman.sh"]
