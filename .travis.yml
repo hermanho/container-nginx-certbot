@@ -14,7 +14,7 @@ jobs:
         - if [ -n "$TRAVIS_TAG" ] || ( [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]); then echo "Push functionality activated"; else echo "Push functionality disabled"; fi
     - stage: build
       script:
-        - docker build -t hermanho/container-nginx-certbot
+        - docker build --build-arg VERSION="$(git describe)" -t hermanho/container-nginx-certbot .
       after_success:
         # Push successful builds of the master branch to Docker Hub
         # $DOCKER_USERNAME    - Docker Hub username used to push the image
