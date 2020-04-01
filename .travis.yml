@@ -1,5 +1,30 @@
 services:
   - docker
 
-before_install:
-  - docker build -t hermanho/container-nginx-certbot
+jobs:
+  include:
+    - stage: prepare::info
+      script:
+        - echo "         TRAVIS_TAG= $TRAVIS_TAG"
+        - echo "      TRAVIS_BRANCH= $TRAVIS_BRANCH"
+        - echo "TRAVIS_PULL_REQUEST= $TRAVIS_PULL_REQUEST"
+        - if [ -n "$TRAVIS_TAG" ]; then echo "Tagged build detected"; else echo "No tagged build detected"; fi
+        - if [ "$TRAVIS_BRANCH" = "master" ]; then echo "Master branch build detected"; else echo "No master branch build detected"; fi
+        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "No pull request build detected"; else echo "Pull request build detected"; fi
+        - if [ -n "$TRAVIS_TAG" ] || ( [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]); then echo "Push functionality activated"; else echo "Push functionality disabled"; fi
+    - stage: build
+      script:
+        - docker build -t hermanho/container-nginx-certbot
+      after_success:
+        # Push successful builds of the master branch to Docker Hub
+        # $DOCKER_USERNAME    - Docker Hub username used to push the image
+        # $DOCKER_PASSWORD    - Password of the Docker Hub user used to push the image
+        # See https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings
+        - if [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+          docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:"$TRAVIS_TAG";
+          fi
+        - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$DOCKER_USERNAME" != "" ] && [ "$DOCKER_PASSWORD" != "" ]; then
+          docker images hermanho/container-nginx-certbot;
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin;
+          docker images --format "{{.Repository}}:{{.Tag}}" "hermanho/container-nginx-certbot" | xargs -L 1 docker push ;
+          fi
