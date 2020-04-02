@@ -13,6 +13,12 @@ env_domains_regex = re.compile(
     "(?:([a-z0-9.-]+)->(https?:\/\/[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
 )
 
+ssl_protocols_str = 'TLSv1.3 TLSv1.2'
+if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'FALSE':
+    print("Disable TLSv1.2")
+    ssl_protocols_str = ssl_protocols_str.replace('TLSv1.2', '')
+print("ssl_protocols_str: " + ssl_protocols_str)
+
 nginx_template = """
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
     default $http_x_forwarded_proto;
@@ -43,14 +49,13 @@ server {{
     ssl_buffer_size 4k;
 
     # modern configuration
-    ssl_protocols TLSv1.3;
+    ssl_protocols """ + ssl_protocols_str + """;
     ssl_prefer_server_ciphers off;
     
     # HSTS (ngx_http_headers_module is required) (63072000 seconds)
     add_header Strict-Transport-Security "max-age=63072000" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
-    add_header X-Frame-Options "DENY" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     
     # OCSP stapling

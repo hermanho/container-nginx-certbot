@@ -1,8 +1,15 @@
-#!/bin/sh
+#!/bin/bash
+
+set -o nounset \
+    -o errexit \
+    -o verbose \
+    -o xtrace
 
 # When we get killed, kill all our children
 trap "exit" INT TERM
 trap "kill 0" EXIT
+
+echo "entrypoint-herman"
 
 if [ -z "$IS_STAGING" ]; then
     export IS_STAGING=1
@@ -14,8 +21,8 @@ if [ -z "$DOMAINS" ]; then
 fi
 
 nginx -v
-python --version
-python scripts/create-nginx-config.py
+python3 --version
+python3 scripts/create-nginx-config.py
 [ $? -ne 0 ] && exit 1
 
 . $(cd $(dirname $0); pwd)/entrypoint.sh
