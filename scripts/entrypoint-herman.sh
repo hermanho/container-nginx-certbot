@@ -1,9 +1,7 @@
 #!/bin/bash
 
 set -o nounset \
-    -o errexit \
-    -o verbose \
-    -o xtrace
+    -o errexit
 
 # When we get killed, kill all our children
 trap "exit" INT TERM
