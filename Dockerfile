@@ -1,6 +1,6 @@
 FROM nginx:alpine
 LABEL maintainer="Herman Ho <hmcherman@gmail.com>"
-LABEL version="1.5.5"
+LABEL version="1.6.0"
 
 # Add /scripts/startup directory to source more startup scripts
 RUN mkdir -p /scripts/startup
