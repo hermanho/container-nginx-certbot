@@ -76,5 +76,7 @@ RUN chmod +x /scripts/*.sh
 #   apt-get clean && \
 #   rm -rf /var/lib/apt/lists/*
 
+HEALTHCHECK --interval=5m --timeout=5s CMD curl --fail http://127.0.0.1/nginx-health || exit 1
+
 ENTRYPOINT []
 CMD ["/bin/bash", "/scripts/entrypoint-herman.sh"]
