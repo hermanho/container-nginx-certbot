@@ -20,7 +20,7 @@ if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'].lower() == 'false
 print("ssl_protocols_str: " + ssl_protocols)
 
 nginx_naxsi = ''
-if 'ENABLE_NAXSI' in os.environ and os.environ['ENABLE_NAXSI'] == 'TRUE':
+if 'ENABLE_NAXSI' in os.environ and os.environ['ENABLE_NAXSI'].lower() == 'true':
     nginx_naxsi = 'include /etc/nginx/rules/naxsi.rules;'
 
 nginx_websocket = ''
@@ -109,6 +109,7 @@ server {{
     }}
 }}
 """
+    return nginx_template
 
 nginx_conf_path = "/etc/nginx/conf.d/"
 mkdir_p(nginx_conf_path, 0o700)
