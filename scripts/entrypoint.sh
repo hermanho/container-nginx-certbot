@@ -31,15 +31,15 @@ while [ true ]; do
     # Make sure we do not run container empty (without nginx process).
     # If nginx quit for whatever reason then stop the container.
     # Leave the restart decision to the container orchestration.
-    if ! ps aux | grep --quiet [n]ginx ; then
+    if ! jobs | grep --quiet nginx ; then
         exit 1
     fi
 
     # Run certbot, tell nginx to reload its config
     echo "Run certbot"
     /scripts/run_certbot.sh
-    echo "Ready to kill nginx"
-    # kill -HUP $NGINX_PID
+    kill -HUP $NGINX_PID
+    echo "nginx ready"
 
     # Sleep for 1 week
     sleep 604810 &

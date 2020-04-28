@@ -23,8 +23,12 @@ python3 scripts/create-nginx-config.py
 [ $? -ne 0 ] && exit 1
 
 
-if [ $ENABLE_NAXSI == "true" || $ENABLE_NAXSI == "TRUE" ]; then
-    cat <(echo "load_module /etc/nginx/modules/ngx_http_naxsi_module.so; # load naxsi") nginx.conf >> nginx.conf
+if [ "$ENABLE_NAXSI" == "true" ] || [ "$ENABLE_NAXSI" == "TRUE" ]; then
+    echo "ENABLE_NAXSI = $ENABLE_NAXSI"
+    cat <(echo "load_module /etc/nginx/modules/ngx_http_naxsi_module.so; # load naxsi") /etc/nginx/nginx.conf >> /etc/nginx/nginx2.conf
+    mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+    mv /etc/nginx/nginx2.conf /etc/nginx/nginx.conf
+    mv /etc/nginx/conf.d/naxsi.conf.disable /etc/nginx/conf.d/naxsi.conf
 fi
 
 . $(cd $(dirname $0); pwd)/entrypoint.sh

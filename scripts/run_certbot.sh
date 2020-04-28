@@ -30,10 +30,5 @@ done
 # did indeed get certificates for
 auto_enable_configs
 
-# Finally, tell nginx to reload the configs
-# kill -HUP $NGINX_PID
-nginx -s reload
-echo "nginx reloaded."
-    
 set +x
 exit $exit_code
