@@ -90,6 +90,9 @@ server {{
     client_max_body_size 1G;
     proxy_max_temp_file_size 0;
 
+    error_log /var/log/nginx/error.log warn;
+    error_log /dev/stderr warn;
+
     location / {{
         proxy_pass {forwardUri};
 
