@@ -57,6 +57,7 @@ server {{
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-NGINX-Request-ID $request_id; # Return to client
     
     # OCSP stapling
     ssl_stapling on;
@@ -71,6 +72,7 @@ server {{
     proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
     proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
     proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+    proxy_set_header X-NGINX-Request-ID $request_id;
     
     proxy_buffering off;
     proxy_buffers 32 4k; 
