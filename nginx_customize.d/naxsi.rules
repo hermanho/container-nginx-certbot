@@ -3,8 +3,10 @@ LibInjectionSql; #enable libinjection support for SQLI
 LibInjectionXss; #enable libinjection support for XSS
 
 DeniedUrl "/requestdenied"; #the location where naxsi will redirect the request when it is blocked
-CheckRule "$SQL >= 8" BLOCK; #the action to take when the $SQL score is superior or equal to 8
-CheckRule "$RFI >= 8" BLOCK;
+CheckRule "$SQL >= 32" BLOCK; #the action to take when the $SQL score is superior or equal to 8
+CheckRule "$RFI >= 32" BLOCK;
 CheckRule "$TRAVERSAL >= 5" BLOCK;
 CheckRule "$UPLOAD >= 5" BLOCK;
-CheckRule "$XSS >= 8" BLOCK;
+CheckRule "$XSS >= 16" BLOCK;
+
+BasicRule wl:1005 "mz:$HEADERS_VAR:Cookie"; 
