@@ -124,7 +124,7 @@ if len(env_domains_array) > 0:
     for (domain, forwardUri) in env_domains_array:
         print(domain + "->" + forwardUri)
         nginx_merged = generate_nginx_config(domain,forwardUri)
-        nginx_domain_conf_path = os.lpath.join(nginx_conf_path, domain+".conf")
+        nginx_domain_conf_path = os.path.join(nginx_conf_path, domain+".conf")
         f = open(nginx_domain_conf_path, "w")
         f.write(nginx_merged)
         f.close()
