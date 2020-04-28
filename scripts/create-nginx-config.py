@@ -13,13 +13,22 @@ env_domains_regex = re.compile(
     "(?:([a-z0-9.-]+)->(https?:\/\/[a-z0-9.]+(?::\d{1,5})?))", re.DOTALL | re.IGNORECASE
 )
 
-ssl_protocols_str = 'TLSv1.3 TLSv1.2'
-if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'] == 'FALSE':
+ssl_protocols = 'TLSv1.3 TLSv1.2'
+if 'ALLOW_TLS_12' in os.environ and os.environ['ALLOW_TLS_12'].lower() == 'false':
     print("Disable TLSv1.2")
-    ssl_protocols_str = ssl_protocols_str.replace('TLSv1.2', '')
-print("ssl_protocols_str: " + ssl_protocols_str)
+    ssl_protocols = ssl_protocols.replace('TLSv1.2', '')
+print("ssl_protocols_str: " + ssl_protocols)
 
-nginx_template = """
+nginx_naxsi = ''
+if 'ENABLE_NAXSI' in os.environ and os.environ['ENABLE_NAXSI'] == 'TRUE':
+    nginx_naxsi = 'include /etc/nginx/rules/naxsi.rules;'
+
+nginx_websocket = ''
+if 'WEBSOCKET' in os.environ and os.environ['WEBSOCKET'].lower() == 'true':
+    nginx_websocket = 'include /etc/nginx/rules/websocket.rules;'
+
+def generate_nginx_config(dns, forwardUri):
+    nginx_template = f"""
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {{
     default $http_x_forwarded_proto;
     ''      $scheme;
@@ -49,7 +58,7 @@ server {{
     ssl_buffer_size 4k;
 
     # modern configuration
-    ssl_protocols """ + ssl_protocols_str + """;
+    ssl_protocols {ssl_protocols};
     ssl_prefer_server_ciphers off;
     
     # HSTS (ngx_http_headers_module is required) (63072000 seconds)
@@ -84,10 +93,15 @@ server {{
     location / {{
         proxy_pass {forwardUri};
 
-{nginx_websocket}
+        {nginx_naxsi}
+
+        {nginx_websocket}
     }}
     
-    
+    location /requestdenied {{
+        return 403;
+    }}
+
     location /nginx-health {{
         access_log off;
         default_type text/plain;
@@ -96,21 +110,12 @@ server {{
 }}
 """
 
-nginx_websocket_template = """
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection $connection_upgrade;
-            proxy_read_timeout 2h;
-"""
-
 nginx_conf_path = "/etc/nginx/conf.d/"
 mkdir_p(nginx_conf_path, 0o700)
 
 print("Creating nginx config from template and environment variables")
 
 env_domains_str = os.environ["DOMAINS"] if "DOMAINS" in os.environ else ""
-env_websocket_str = os.environ["WEBSOCKET"] if "WEBSOCKET" in os.environ else ""
-env_websocket = env_websocket_str == "true"
 env_domains_array = env_domains_regex.findall(env_domains_str)
 
 if len(env_domains_array) > 0:
@@ -118,12 +123,8 @@ if len(env_domains_array) > 0:
 
     for (domain, forwardUri) in env_domains_array:
         print(domain + "->" + forwardUri)
-        nginx_merged = nginx_template.format(
-            dns=domain,
-            forwardUri=forwardUri,
-            nginx_websocket=nginx_websocket_template if env_websocket else "",
-        )
-        nginx_domain_conf_path = os.path.join(nginx_conf_path, domain+".conf")
+        nginx_merged = generate_nginx_config(domain,forwardUri)
+        nginx_domain_conf_path = os.lpath.join(nginx_conf_path, domain+".conf")
         f = open(nginx_domain_conf_path, "w")
         f.write(nginx_merged)
         f.close()

@@ -53,14 +53,20 @@ LABEL version="1.6.2"
 ARG NAXSI_VER=0.56
 ENV NAXSI_VER=$NAXSI_VER
 
+RUN apk add --no-cache --update bash grep ncurses coreutils curl certbot python3 \
+  && rm -rf /var/cache/apk/* \
+  && if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi \
+  && rm -fr /var/cache/apk/*
+
 COPY --from=nginx-naxsi-build /src/nginx-$NGINX_VERSION/objs/ngx_http_naxsi_module.so /etc/nginx/modules/
-COPY --from=nginx-naxsi-build /src/naxsi-$NAXSI_VER/naxsi_config/naxsi_core.rules /etc/nginx/
+COPY --from=nginx-naxsi-build /src/naxsi-$NAXSI_VER/naxsi_config/naxsi_core.rules /etc/nginx/rules/
 
 # Add /scripts/startup directory to source more startup scripts
 RUN mkdir -p /scripts/startup
 # Copy in default nginx configuration (which just forwards ACME requests to
 # certbot, or redirects to HTTPS, but has no HTTPS configurations by default).
 RUN rm -f /etc/nginx/conf.d/*
+COPY ./nginx_customize.d/ /etc/nginx/rules/
 COPY ./nginx_conf.d/ /etc/nginx/conf.d/
 COPY ./scripts/ /scripts/
 RUN chmod +x /scripts/*.sh 
@@ -69,11 +75,6 @@ RUN chmod +x /scripts/*.sh
 #   apt install -y libssl-dev curl certbot python3 && \
 #   apt-get clean && \
 #   rm -rf /var/lib/apt/lists/*
-
-RUN apk add --no-cache --update bash grep ncurses coreutils curl certbot python3 \
-  && rm -rf /var/cache/apk/* \
-  && if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi \
-  && rm -fr /var/cache/apk/*
 
 ENTRYPOINT []
 CMD ["/bin/bash", "/scripts/entrypoint-herman.sh"]
