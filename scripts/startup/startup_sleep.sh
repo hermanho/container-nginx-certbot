@@ -13,6 +13,8 @@ curl_ret=$?
 if [ $curl_ret -ne 0 ]; then
     echo "$curl_ret"
     echo "Nginx booting error."
+    sleep 30
+    echo "Exit..."
     exit_code=1
     exit $exit_code
 fi
