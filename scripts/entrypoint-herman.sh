@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -o nounset \
-    -o errexit
+set -o errexit
 
 # When we get killed, kill all our children
 trap "exit" INT TERM
