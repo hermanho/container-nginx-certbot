@@ -22,6 +22,8 @@ print("ssl_protocols_str: " + ssl_protocols)
 nginx_naxsi = ''
 if 'ENABLE_NAXSI' in os.environ and os.environ['ENABLE_NAXSI'].lower() == 'true':
     nginx_naxsi = 'include /etc/nginx/rules/naxsi.rules;'
+    if 'ENABLE_NAXSI_LEARNING_MODE' in os.environ and os.environ['ENABLE_NAXSI_LEARNING_MODE'].lower() == 'true':
+        nginx_naxsi = nginx_naxsi + '\nLearningMode;'
 
 nginx_websocket = ''
 if 'WEBSOCKET' in os.environ and os.environ['WEBSOCKET'].lower() == 'true':
