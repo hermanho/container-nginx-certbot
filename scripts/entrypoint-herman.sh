@@ -24,7 +24,7 @@ python3 scripts/create-nginx-config.py
 
 echo "logrotate ..."
 touch /var/log/messages
-logrotate -f /etc/logrotate.conf
+logrotate /etc/logrotate.conf
 
 if [ "$ENABLE_NAXSI" == "true" ] || [ "$ENABLE_NAXSI" == "TRUE" ]; then
     echo "ENABLE_NAXSI = $ENABLE_NAXSI"
