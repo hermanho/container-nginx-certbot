@@ -53,7 +53,7 @@ LABEL version="1.6.2"
 ARG NAXSI_VER=0.56
 ENV NAXSI_VER=$NAXSI_VER
 
-RUN apk add --no-cache --update bash grep ncurses coreutils curl certbot python3 \
+RUN apk add --no-cache --update bash grep ncurses coreutils curl certbot python3 logrotate \
   && rm -rf /var/cache/apk/* \
   && if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi \
   && rm -fr /var/cache/apk/*
@@ -68,8 +68,9 @@ RUN mkdir -p /scripts/startup
 RUN rm -f /etc/nginx/conf.d/*
 COPY ./nginx_customize.d/ /etc/nginx/rules/
 COPY ./nginx_conf.d/ /etc/nginx/conf.d/
+COPY ./logrotate.d/ /etc/logrotate.d/
 COPY ./scripts/ /scripts/
-RUN chmod +x /scripts/*.sh 
+RUN chmod 644 /etc/logrotate.d/* && chmod +x /scripts/*.sh 
 
 # RUN apt update && \
 #   apt install -y libssl-dev curl certbot python3 && \
