@@ -38,13 +38,16 @@ while [ true ]; do
     # Run certbot, tell nginx to reload its config
     echo "Run certbot"
     /scripts/run_certbot.sh
-    nginx -s reload
+    kill -HUP $NGINX_PID
+    wait $NGINX_PID
     echo "nginx ready with PID $NGINX_PID"
+    echo "listing nginx process"
+    ps aux | grep [n]ginx
 
     # Sleep for 1 week
     sleep 604810 &
     SLEEP_PID=$!
 
     # Wait for 1 week sleep or nginx
-    wait -n "$SLEEP_PID" "$NGINX_PID"
+    wait -n "$SLEEP_PID"
 done
