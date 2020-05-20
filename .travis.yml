@@ -26,7 +26,12 @@ jobs:
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "No pull request build detected"; else echo "Pull request build detected"; fi
         - if [ -n "$TRAVIS_TAG" ] || ( [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]); then echo "Push functionality activated"; else echo "Push functionality disabled"; fi
         - docker pull hermanho/container-nginx-certbot:latest;
-        - buildctl build --opt build-arg:VERSION="$GIT_TAG_VERSION" --output type=image,name=hermanho/container-nginx-certbot ;
+        - buildctl build \
+            --frontend=dockerfile.v0 \
+            --local context=. \
+            --local dockerfile=.
+            --opt build-arg:VERSION="$GIT_TAG_VERSION" \
+            --output type=image,name=hermanho/container-nginx-certbot ;
         - docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:"$GIT_COMMIT";
       after_success:
         # Push successful builds of the master branch to Docker Hub
