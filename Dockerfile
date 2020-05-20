@@ -70,7 +70,7 @@ COPY ./nginx_customize.d/ /etc/nginx/rules/
 COPY ./nginx_conf.d/ /etc/nginx/conf.d/
 COPY ./logrotate.d/ /etc/logrotate.d/
 COPY ./scripts/ /scripts/
-RUN chmod 644 /etc/logrotate.d/* && chmod +x /scripts/*.sh 
+RUN chmod 644 /etc/logrotate.d/* && chmod 755 /scripts/**/*.sh 
 
 # RUN apt update && \
 #   apt install -y libssl-dev curl certbot python3 && \
