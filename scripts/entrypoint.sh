@@ -39,7 +39,7 @@ while [ true ]; do
     echo "Run certbot"
     /scripts/run_certbot.sh
     kill -HUP $NGINX_PID
-    echo "nginx ready"
+    echo "nginx ready with PID $NGINX_PID"
 
     # Sleep for 1 week
     sleep 604810 &
