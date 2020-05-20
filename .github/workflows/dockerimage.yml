@@ -1,0 +1,72 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master ]
+
+env:
+  REPOSITORY_URI: hermanho/container-nginx-certbot
+
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: ''
+#     - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+    - run: echo ::set-env name=TODAY_TAG::$(date +%s)
+    - run: echo ::set-env name=GIT_COMMIT::${GITHUB_SHA::7}
+    - run: echo ::set-env name=IMAGE_TAG::${GITHUB_SHA::7}
+    - run: echo ::set-env name=GIT_TAG_VERSION::$(git describe)
+#     - run: docker pull hermanho/container-nginx-certbot:latest
+            
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        buildx-version: latest
+        qemu-version: latest
+        
+    - name: Run Buildx
+      run: |
+        docker buildx build \
+          --platform linux/amd64 \
+          --tag "$REPOSITORY_URI" \
+          --build-arg VERSION="$GIT_TAG_VERSION" \
+          --build-arg GIT_HASH="$GIT_COMMIT" \
+          --load \
+          --file ./Dockerfile .
+           
+    - run: docker images
+         
+    - name: Update tagging
+      if: startsWith(github.ref, 'ref/head/v')
+      run: |
+        echo ::set-env name=GIT_DESCRIBE::$(git describe)
+        echo ::set-env name=IMAGE_TAG::$GIT_DESCRIBE
+
+    - name: Tag docker image
+      run: |
+        docker tag ${REPOSITORY_URI}:latest ${REPOSITORY_URI}:${IMAGE_TAG}
+        
+    - run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin;
+
+#     - name: Push docker image
+#       run: |
+#         docker images --filter "dangling=true" -q --no-trunc | xargs -r docker rmi
+#         docker images
+#         docker images --format "{{.Repository}}:{{.Tag}}" "$REPOSITORY_URI" | xargs -r -L 1 docker push
+    - name: Push docker image
+      run: |
+        docker images "${REPOSITORY_URI}"
+        docker images --format "{{.Repository}}:{{.Tag}}" "${REPOSITORY_URI}" | xargs -r -L 1 docker push
