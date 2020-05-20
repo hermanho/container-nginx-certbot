@@ -1,13 +1,23 @@
 language: minimal
+sudo: required
 services:
   - docker
+
+env:
+  global:
+    - PREFER_BUILDCTL="1"
+
+before_install:
+  - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest --addr tcp://0.0.0.0:1234
+  - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+  - export BUILDKIT_HOST=tcp://0.0.0.0:1234
 
 jobs:
   include:
     - stage: build
       script:
-        - echo "GIT_COMMIT=$(git rev-parse --short HEAD)"
-        - echo "GIT_TAG_VERSION=$(git describe)"
+        - $GIT_COMMIT=$(git rev-parse --short HEAD)
+        - $GIT_TAG_VERSION=$(git describe)
         - echo "TRAVIS_TAG=$TRAVIS_TAG"
         - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH"
         - echo "TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
@@ -15,7 +25,8 @@ jobs:
         - if [ "$TRAVIS_BRANCH" = "master" ]; then echo "Master branch build detected"; else echo "No master branch build detected"; fi
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "No pull request build detected"; else echo "Pull request build detected"; fi
         - if [ -n "$TRAVIS_TAG" ] || ( [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]); then echo "Push functionality activated"; else echo "Push functionality disabled"; fi
-        - docker build --build-arg VERSION="$GIT_TAG_VERSION" -t hermanho/container-nginx-certbot .
+        - docker pull hermanho/container-nginx-certbot:latest;
+        - buildctl --build-arg VERSION="$GIT_TAG_VERSION" -t hermanho/container-nginx-certbot .;
         - docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:$GIT_COMMIT;
       after_success:
         # Push successful builds of the master branch to Docker Hub
