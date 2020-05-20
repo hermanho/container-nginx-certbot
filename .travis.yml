@@ -26,15 +26,15 @@ jobs:
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "No pull request build detected"; else echo "Pull request build detected"; fi
         - if [ -n "$TRAVIS_TAG" ] || ( [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]); then echo "Push functionality activated"; else echo "Push functionality disabled"; fi
         - docker pull hermanho/container-nginx-certbot:latest;
-        - buildctl build --build-arg VERSION="$GIT_TAG_VERSION" -t hermanho/container-nginx-certbot .;
-        - docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:$GIT_COMMIT;
+        - buildctl build --opt build-arg:VERSION="$GIT_TAG_VERSION" --output type=image,name=hermanho/container-nginx-certbot ;
+        - docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:"$GIT_COMMIT";
       after_success:
         # Push successful builds of the master branch to Docker Hub
         # $DOCKER_USERNAME    - Docker Hub username used to push the image
         # $DOCKER_PASSWORD    - Password of the Docker Hub user used to push the image
         # See https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings
         - if [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-          docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:$TRAVIS_TAG;
+          docker tag hermanho/container-nginx-certbot:latest hermanho/container-nginx-certbot:"$TRAVIS_TAG";
           fi
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$DOCKER_USERNAME" != "" ] && [ "$DOCKER_PASSWORD" != "" ]; then
           docker images --filter "dangling=true" -q --no-trunc | xargs -r docker rmi;
