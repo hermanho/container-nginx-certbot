@@ -14,7 +14,7 @@ template_user_configs
 auto_enable_configs
 
 # Start up nginx, save PID so we can reload config inside of run_certbot.sh
-nginx -g "daemon off;" &
+nginx -c /etc/nginx/nginx.conf -g "daemon off;" &
 NGINX_PID=$!
 
 # Lastly, run startup scripts
@@ -31,23 +31,20 @@ while [ true ]; do
     # Make sure we do not run container empty (without nginx process).
     # If nginx quit for whatever reason then stop the container.
     # Leave the restart decision to the container orchestration.
-    if ! jobs | grep --quiet nginx ; then
+    if ! ps aux | grep --quiet [n]ginx ; then
         exit 1
     fi
 
     # Run certbot, tell nginx to reload its config
     echo "Run certbot"
     /scripts/run_certbot.sh
+    sleep 1
     kill -HUP $NGINX_PID
-    wait $NGINX_PID
-    echo "nginx ready with PID $NGINX_PID"
-    echo "listing nginx process"
-    ps aux | grep [n]ginx
 
     # Sleep for 1 week
     sleep 604810 &
     SLEEP_PID=$!
 
     # Wait for 1 week sleep or nginx
-    wait -n "$SLEEP_PID"
+    wait -n "$SLEEP_PID" "$NGINX_PID"
 done
