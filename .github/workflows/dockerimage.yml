@@ -22,7 +22,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: ''
-#     - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
     - run: echo ::set-env name=TODAY_TAG::$(date +%s)
     - run: echo ::set-env name=GIT_COMMIT::${GITHUB_SHA::7}
@@ -45,7 +44,7 @@ jobs:
           --build-arg VERSION="$GIT_TAG_VERSION" \
           --build-arg GIT_HASH="$GIT_COMMIT" \
           --load \
-          --file ./Dockerfile .
+          --file ./src/Dockerfile src
            
     - run: docker images
          
