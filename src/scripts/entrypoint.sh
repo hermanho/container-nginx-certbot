@@ -40,7 +40,10 @@ while [ true ]; do
     /scripts/run_certbot.sh
     sleep 1
     kill -HUP $NGINX_PID
-
+    
+    echo "List nginx processes"
+    ps aux | grep [n]ginx
+    
     # Sleep for 1 week
     sleep 604810 &
     SLEEP_PID=$!
