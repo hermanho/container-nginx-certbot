@@ -22,6 +22,7 @@ python3 --version
 python3 scripts/create-nginx-config.py
 [ $? -ne 0 ] && exit 1
 
+certbot update_symlinks
 if [ "$ENABLE_LOGROTATE" == "true" ] || [ "$ENABLE_LOGROTATE" == "TRUE" ]; then
     echo "logrotate ..."
     touch /var/log/messages
